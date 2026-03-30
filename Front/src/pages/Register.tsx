@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiService } from "../api/axios"; 
+import { Link } from "react-router-dom";
 
 export function RegisterForm() {
   const [name, setName] = useState("");
@@ -120,6 +121,12 @@ export function RegisterForm() {
       >
         {loading ? "Création du compte..." : "S'inscrire"}
       </button>
+      <p className="text-center text-sm text-gray-600 mt-4">
+        Déjà inscrit ?{" "}
+        <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            Se connecter
+        </Link>
+      </p>
     </form>
   );
 }

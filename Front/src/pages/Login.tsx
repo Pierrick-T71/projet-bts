@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiService } from "../api/axios";
+import { Link } from "react-router-dom";
 
 export function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   const [email, setEmail] = useState("");
@@ -73,6 +74,12 @@ export function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
       >
         {loading ? "Connexion en cours..." : "Se connecter"}
       </button>
+      <p className="text-center text-sm text-gray-600 mt-4">
+        Pas encore de compte ?{" "}
+        <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+            Créer un compte
+        </Link>
+      </p>
     </form>
   );
 }
