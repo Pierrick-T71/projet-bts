@@ -43,22 +43,22 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
         <Routes>
-          {/* 1. Accueil : Redirection automatique */}
+          {/* Accueil : Redirection automatique */}
           <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
 
-          {/* 2. Page Login */}
+          {/* Page Login */}
           <Route 
             path="/login" 
             element={!user ? <LoginForm onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/dashboard" />} 
           />
 
-          {/* 3. Page Register */}
+          {/* Page Register */}
           <Route 
             path="/register" 
             element={!user ? <RegisterForm /> : <Navigate to="/dashboard" />} 
           />
 
-          {/* 4. Page Dashboard (PROPRE) */}
+          {/* Page Dashboard */}
           <Route 
             path="/dashboard" 
             element={

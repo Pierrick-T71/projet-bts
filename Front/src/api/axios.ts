@@ -28,13 +28,13 @@ class ApiService {
 
     async login(data: Login) {
         try {
-            await api.get('/sanctum/csrf-cookie'); // Très important avant le login !
-            const response = await api.post('/login', data); // ✅ DATA AJOUTÉ ICI !
+            await api.get('/sanctum/csrf-cookie');
+            const response = await api.post('/login', data);
             console.log('Connexion réussie :', response.data);
             return response.data;
         } catch (error: any) {
             console.error('Erreur login :', error.response?.data || error.message);
-            throw error; // ✅ INDISPENSABLE pour que Login.tsx puisse afficher l'erreur
+            throw error;
         }
     }
 
@@ -46,7 +46,7 @@ class ApiService {
             return response.data;
         } catch (error: any) {
             console.error('Erreur inscription :', error.response?.data || error.message);
-            throw error; // ✅ INDISPENSABLE ICI AUSSI
+            throw error;
         }
     }
 
@@ -69,6 +69,20 @@ class ApiService {
             console.error("Erreur lors de la déconnexion :", error);
             throw error;
         }
+    }
+
+    async getExercices() {
+        const response = await api.get('/api/exercices');
+        return response.data;
+    }
+
+    async createExercice(data: { nom: string, description: string }) {
+        const response = await api.post('/api/exercices', data);
+        return response.data;
+    }
+
+    async deleteExercice(id: number) {
+        await api.delete(`/api/exercices/${id}`);
     }
 }
 

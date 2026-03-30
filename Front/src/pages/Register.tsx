@@ -73,7 +73,7 @@ export function RegisterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          placeholder="jean.dupont@email.com"
+          placeholder="exemple@email.com"
           className={inputStyle}
         />
       </div>
