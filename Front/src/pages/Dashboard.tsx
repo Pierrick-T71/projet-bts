@@ -3,41 +3,98 @@ import { apiService } from "../api/axios";
 
 export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void }) {
   const [exercices, setExercices] = useState<any[]>([]);
+  const [programmes, setProgrammes] = useState<any[]>([]); // Pour stocker les matières
+  
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedProgrammes, setSelectedProgrammes] = useState<number[]>([]); // Tableau d'IDs
+  
+  // Gestion des notifications (Toasts)
+  const [notification, setNotification] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+  const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ text, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   useEffect(() => {
-    loadExercices();
+    loadData();
   }, []);
 
-  const loadExercices = async () => {
-    const data = await apiService.getExercices();
-    setExercices(data);
+  // Charge les exos ET les programmes en même temps
+  const loadData = async () => {
+    try {
+      const [exosData, progsData] = await Promise.all([
+        apiService.getExercices(),
+        apiService.getProgrammes()
+      ]);
+      setExercices(exosData);
+      setProgrammes(progsData);
+    } catch (error) {
+      console.error("Erreur de chargement des données", error);
+    }
+  };
+
+  // Fonction pour cocher/décocher un programme
+  const toggleProgramme = (id: number) => {
+    setSelectedProgrammes(prev => 
+      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
+    );
   };
 
   const handleAddExercice = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Sécurité : obliger le prof à choisir au moins une matière
+    if (selectedProgrammes.length === 0) {
+      showNotification("Veuillez sélectionner au moins une matière.", "error");
+      return;
+    }
+
     try {
-      await apiService.createExercice({ nom, description });
+      await apiService.createExercice({ 
+        nom, 
+        description, 
+        programmes: selectedProgrammes // On envoie le tableau d'IDs à Laravel
+      });
+      
+      // On vide le formulaire
       setNom(""); 
       setDescription("");
-      await loadExercices(); 
+      setSelectedProgrammes([]); 
+      
+      await loadData(); 
+      showNotification("Exercice publié avec succès !"); 
     } catch (err) {
       console.error("Erreur lors de l'ajout :", err);
-      alert("Erreur lors de l'ajout. Vérifie la console.");
+      showNotification("Erreur lors de la publication.", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if(confirm("Êtes-vous sûr de vouloir supprimer cet exercice ?")) {
-        await apiService.deleteExercice(id);
-        loadExercices();
+    if(window.confirm("Êtes-vous sûr de vouloir supprimer cet exercice ?")) {
+        try {
+            await apiService.deleteExercice(id);
+            await loadData();
+            showNotification("Exercice supprimé !");
+        } catch (err) {
+            showNotification("Erreur lors de la suppression.", "error");
+        }
     }
   };
 
   return (
     <div className="fixed inset-0 z-10 bg-gray-50 overflow-y-auto w-full h-full text-left">
       
+      {/* LA NOTIFICATION FLOTTANTE (TOAST) */}
+      {notification && (
+        <div className={`fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-xl z-50 text-white font-bold transition-all animate-bounce ${
+          notification.type === 'success' ? 'bg-green-500 shadow-green-200' : 'bg-red-500 shadow-red-200'
+        }`}>
+          {notification.text}
+        </div>
+      )}
+
       {/* 1. LA BARRE DE NAVIGATION EN HAUT (NAVBAR) */}
       <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-4">
@@ -65,18 +122,36 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
         {/* COLONNE GAUCHE : Formulaire (Si prof uniquement) */}
         {user.role === 'prof' && (
           <div className="w-full md:w-1/3">
-            {/* Le formulaire reste "collé" en haut quand on scroll (sticky) */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 sticky top-28">
               <h2 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                 <span className="text-blue-600 text-2xl">+</span> Créer un exercice
               </h2>
               
               <form onSubmit={handleAddExercice} className="flex flex-col gap-4">
+                
+                {/* NOUVEAU : Les cases à cocher pour la relation N:N */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Matières (Plusieurs choix possibles)</label>
+                  <div className="flex flex-wrap gap-3">
+                    {programmes.map(prog => (
+                      <label key={prog.id} className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                        <input 
+                          type="checkbox" 
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          checked={selectedProgrammes.includes(prog.id)}
+                          onChange={() => toggleProgramme(prog.id)}
+                        />
+                        <span className="text-sm font-medium text-gray-700">{prog.nom}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">Titre de l'exercice</label>
                   <input 
                     className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition" 
-                    placeholder="Ex: Mathématiques - Algèbre" 
+                    placeholder="Ex: Pompes, Squats, etc." 
                     value={nom} 
                     onChange={e => setNom(e.target.value)} 
                     required 
@@ -86,7 +161,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
                   <label className="block text-sm font-bold text-gray-700 mb-1.5">Consignes / Description</label>
                   <textarea 
                     className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition min-h-[140px] resize-y" 
-                    placeholder="Détaillez le travail à faire..." 
+                    placeholder="Détaillez l'exercice' à faire..." 
                     value={description} 
                     onChange={e => setDescription(e.target.value)} 
                     required 
@@ -110,7 +185,6 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
             </span>
           </div>
 
-          {/* S'il n'y a pas d'exercices */}
           {exercices.length === 0 ? (
             <div className="bg-white p-12 rounded-2xl border-2 border-dashed border-gray-300 text-center flex flex-col items-center justify-center text-gray-500">
               <span className="text-4xl mb-3">📚</span>
@@ -118,17 +192,30 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
               {user.role === 'prof' && <p className="text-sm mt-1">Commencez par en créer un via le formulaire à gauche.</p>}
             </div>
           ) : (
-            
-            /* Grille d'affichage des exercices */
             <div className="grid grid-cols-1 gap-5">
               {exercices.map((ex) => (
                 <div key={ex.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between gap-6 hover:shadow-md transition">
                   <div className="flex-1">
+                    
+                    {/* NOUVEAU : Affichage des badges dynamiques (relation N:N) */}
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {ex.programmes && ex.programmes.length > 0 ? (
+                        ex.programmes.map((p: any) => (
+                          <span key={p.id} className="inline-block bg-indigo-100 text-indigo-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider border border-indigo-200">
+                            {p.nom}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider border border-gray-200">
+                          Non classé
+                        </span>
+                      )}
+                    </div>
+
                     <h3 className="font-extrabold text-xl text-blue-900 mb-2">{ex.nom}</h3>
                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{ex.description}</p>
                   </div>
                   
-                  {/* Bouton supprimer (Si prof uniquement) */}
                   {user.role === 'prof' && (
                     <div className="sm:border-l sm:border-gray-100 sm:pl-6 flex items-center shrink-0">
                       <button 
@@ -143,9 +230,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
               ))}
             </div>
           )}
-
         </div>
-
       </main>
     </div>
   );

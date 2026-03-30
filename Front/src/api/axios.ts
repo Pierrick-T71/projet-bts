@@ -71,12 +71,17 @@ class ApiService {
         }
     }
 
+    async getProgrammes() {
+        const response = await api.get('/api/programmes');
+        return response.data;
+    }
+    
     async getExercices() {
         const response = await api.get('/api/exercices');
         return response.data;
     }
 
-    async createExercice(data: { nom: string, description: string }) {
+    async createExercice(data: { nom: string, description: string, programmes: number[] }) {
         const response = await api.post('/api/exercices', data);
         return response.data;
     }

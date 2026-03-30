@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Exercice extends Model
 {
-    protected $table = 'exercices';
     protected $fillable = ['nom', 'description'];
+
+    public function programmes()
+    {
+        return $this->belongsToMany(Programme::class);
+    }
 }
