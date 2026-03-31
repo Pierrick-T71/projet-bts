@@ -19,17 +19,17 @@ class ExerciceController extends Controller
         $request->validate([
             'nom' => 'required|string|max:255',
             'description' => 'required|string',
-            'programmes' => 'required|array', // On attend un TABLEAU d'IDs
+            'programmes' => 'required|array', // On attend un TABLEAU d'ID
             'programmes.*' => 'exists:programmes,id',
         ]);
 
-        // 1. On crée l'exercice
+        // On crée l'exercice
         $exercice = Exercice::create([
             'nom' => $request->nom,
             'description' => $request->description,
         ]);
 
-        // 2. LA MAGIE : On lie l'exercice aux programmes dans la table pivot !
+        // On lie l'exercice aux programmes dans la table pivot
         $exercice->programmes()->attach($request->programmes);
 
         return response()->json($exercice, 201);
