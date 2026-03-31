@@ -14,12 +14,15 @@ class ExerciceController extends Controller
         return response()->json(Exercice::with('programmes')->latest()->get());
     }
 
+    /**
+     * Enregiste un exercice.
+     */
     public function store(Request $request)
     {
         $request->validate([
             'nom' => 'required|string|max:255',
             'description' => 'required|string',
-            'programmes' => 'required|array', // On attend un TABLEAU d'ID
+            'programmes' => 'required|array', // On attend un TABLEAU d'IDs
             'programmes.*' => 'exists:programmes,id',
         ]);
 
@@ -29,7 +32,7 @@ class ExerciceController extends Controller
             'description' => $request->description,
         ]);
 
-        // On lie l'exercice aux programmes dans la table pivot
+        // On lie l'exercice aux programmes dans la table pivot 
         $exercice->programmes()->attach($request->programmes);
 
         return response()->json($exercice, 201);
