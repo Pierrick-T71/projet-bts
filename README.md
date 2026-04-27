@@ -23,10 +23,26 @@ Ouvrez un premier terminal, naviguez dans le dossier du backend et exécutez les
 # 1. Se placer dans le dossier backend
 cd Back
 
-# 2. Créer les tables et injecter les données de test
+# 2. Installer les dépendances PHP
+composer install
+
+# 3. Créer le fichier .env si absent
+cp .env.example .env
+
+# 4. Générer la clé Laravel (obligatoire)
+php artisan key:generate
+
+# 5. Le .env doit contenir 
+APP_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:5173
+
+SESSION_DOMAIN=localhost
+SANCTUM_STATEFUL_DOMAINS=localhost:5173
+
+# 6. Créer les tables et injecter les données de test
 php artisan migrate:fresh --seed
 
-# 3. Lancer le serveur de l'API
+# 7. Lancer le serveur de l'API
 php artisan serve
 
 ```
