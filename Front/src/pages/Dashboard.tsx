@@ -45,9 +45,9 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
   const handleAddExercice = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Sécurité : obliger le prof à choisir au moins une matière
+    // Sécurité : obliger le prof à choisir au moins un programme
     if (selectedProgrammes.length === 0) {
-      showNotification("Veuillez sélectionner au moins une matière.", "error");
+      showNotification("Veuillez sélectionner au moins un programme.", "error");
       return;
     }
 
