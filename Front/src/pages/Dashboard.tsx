@@ -3,7 +3,7 @@ import { apiService } from "../api/axios";
 
 export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void }) {
   const [exercices, setExercices] = useState<any[]>([]);
-  const [programmes, setProgrammes] = useState<any[]>([]); // Pour stocker les matières
+  const [programmes, setProgrammes] = useState<any[]>([]);
   
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
@@ -86,7 +86,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
   return (
     <div className="fixed inset-0 z-10 bg-gray-50 overflow-y-auto w-full h-full text-left">
       
-      {/* LA NOTIFICATION FLOTTANTE (TOAST) */}
+      {/* Notif succès de création exos) */}
       {notification && (
         <div className={`fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-xl z-50 text-white font-bold transition-all animate-bounce ${
           notification.type === 'success' ? 'bg-green-500 shadow-green-200' : 'bg-red-500 shadow-red-200'
@@ -95,7 +95,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
         </div>
       )}
 
-      {/* 1. LA BARRE DE NAVIGATION EN HAUT (NAVBAR) */}
+      {/* 1. Navbar */}
       <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-inner">
@@ -116,10 +116,10 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
         </button>
       </nav>
 
-      {/* 2. LA ZONE PRINCIPALE */}
+      {/* 2. Page principale */}
       <main className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8">
 
-        {/* COLONNE GAUCHE : Formulaire (Si prof uniquement) */}
+        {/*  Formulaire (Si prof uniquement) */}
         {user.role === 'prof' && (
           <div className="w-full md:w-1/3">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 sticky top-28">
@@ -129,7 +129,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
               
               <form onSubmit={handleAddExercice} className="flex flex-col gap-4">
                 
-                {/* NOUVEAU : Les cases à cocher pour la relation N:N */}
+                {/* Case à cocher pour les 4 programmes */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Matières (Plusieurs choix possibles)</label>
                   <div className="flex flex-wrap gap-3">
@@ -175,7 +175,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
           </div>
         )}
 
-        {/* COLONNE DROITE : Liste des exercices */}
+        {/* Liste des exercices */}
         <div className={`w-full ${user.role === 'prof' ? 'md:w-2/3' : 'max-w-4xl mx-auto'}`}>
           
           <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
@@ -197,7 +197,7 @@ export function Dashboard({ user, onLogout }: { user: any, onLogout: () => void 
                 <div key={ex.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between gap-6 hover:shadow-md transition">
                   <div className="flex-1">
                     
-                    {/* NOUVEAU : Affichage des badges dynamiques (relation N:N) */}
+                    {/* Affichage des badges dynamiques */}
                     <div className="mb-3 flex flex-wrap gap-2">
                       {ex.programmes && ex.programmes.length > 0 ? (
                         ex.programmes.map((p: any) => (
