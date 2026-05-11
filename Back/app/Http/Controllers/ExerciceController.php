@@ -37,4 +37,17 @@ class ExerciceController extends Controller
 
         return response()->json($exercice, 201);
     }
+
+    /**
+    * Supprimer un exercice 
+    */
+    public function destroy($id)
+    {
+        $exercice = Exercice::findOrFail($id);
+        $exercice->delete();
+
+        return response()->json(null, 204);
+    }
+
+
 }
